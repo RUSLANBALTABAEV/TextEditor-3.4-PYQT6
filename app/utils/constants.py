@@ -1,10 +1,9 @@
+# app/utils/constants.py
 # Константы приложения PyQt6
-
 # Настройки по умолчанию
 DEFAULT_FONT = ('Consolas', 11)
 DEFAULT_THEME = 'light'
-AUTOSAVE_INTERVAL = 300000  # 5 минут в миллисекундах
-
+AUTOSAVE_INTERVAL = 300000 # 5 минут в миллисекундах
 # Поддерживаемые типы файлов
 SUPPORTED_FILES = [
     ("Текстовые файлы", "*.txt"),
@@ -16,7 +15,6 @@ SUPPORTED_FILES = [
     ("Markdown файлы", "*.md"),
     ("Все файлы", "*.*")
 ]
-
 # Темы
 THEMES = {
     'light': {
@@ -48,7 +46,6 @@ THEMES = {
         'selection': '#49483e'
     }
 }
-
 # Размеры интерфейса
 DEFAULT_WINDOW_WIDTH = 1200
 DEFAULT_WINDOW_HEIGHT = 700
