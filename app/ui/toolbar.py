@@ -2,10 +2,11 @@
 """
 Менеджер панели инструментов
 """
-from PyQt6.QtWidgets import QToolBar, QPushButton, QComboBox
+from PyQt6.QtWidgets import QToolBar
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from app.utils.icon_manager import get_icon_manager
+
 class ToolbarManager:
     """Управление панелью инструментов"""
    
@@ -16,7 +17,8 @@ class ToolbarManager:
        
     def create_toolbar(self):
         """Создать панель инструментов"""
-        self.toolbar = self.editor.addToolBar("Главная панель")
+        self.toolbar = self.editor.addToolBar("MainToolbar")
+        self.toolbar.setObjectName("MainToolbar")  # ✅ ИСПРАВЛЕНО: Установляем objectName
         self.toolbar.setMovable(False)
         self.toolbar.setIconSize(self.toolbar.iconSize())
        
@@ -33,10 +35,10 @@ class ToolbarManager:
         self.toolbar.addSeparator()
        
         # Вкладки
-        action = self.toolbar.addAction(self.icons.get_icon("tab_new"), "Новая вкладка")
+        action = self.toolbar.addAction(self.icons.file_new(), "Новая вкладка")
         action.triggered.connect(self.editor.new_tab)
        
-        action = self.toolbar.addAction(self.icons.get_icon("tab_close"), "Закрыть")
+        action = self.toolbar.addAction(self.icons.tool_settings(), "Закрыть")
         action.triggered.connect(self.editor.close_current_tab)
        
         self.toolbar.addSeparator()

@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+
 def build_executable():
     """Сборка приложения в .exe файл"""
    
@@ -50,29 +51,24 @@ def build_executable():
     # Команда для PyInstaller
     cmd = [
         "pyinstaller",
-        "--onefile", # Один файл без зависимостей
-        "--windowed", # Без консольного окна
-        "--name", "TextEditor", # Имя приложения
-        "--icon=TextEditor.ico" if Path("TextEditor.ico").exists() else "",
-        "--add-data=backups:backups" if Path("backups").exists() else "",
-        "--add-data=plugins:plugins" if Path("plugins").exists() else "",
+        "--onefile",  # Один файл без зависимостей
+        "--windowed",  # Без консольного окна
+        "--name", "TextEditor",  # Имя приложения
         "--hidden-import=PyQt6.QtCore",
         "--hidden-import=PyQt6.QtGui",
         "--hidden-import=PyQt6.QtWidgets",
         "--hidden-import=PyQt6.QtPrintSupport",
+        "--hidden-import=app.core",
+        "--hidden-import=app.features",
+        "--hidden-import=app.ui",
+        "--hidden-import=app.utils",
         str(main_py)
     ]
-   
-    # Добавляем папку с иконками
-    icons_path = "app/icons"  # Путь к папке icons относительно корня проекта
-    if Path(icons_path).exists():
-        sep = ';' if os.name == 'nt' else ':'
-        cmd.append(f"--add-data={icons_path}{sep}{icons_path}")
-    else:
-        print(f"⚠️ Папка {icons_path} не найдена. Иконки не будут добавлены в .exe.")
-   
-    # Удаляем пустые параметры
-    cmd = [c for c in cmd if c]
+    
+    # Добавляем иконку если она есть
+    ico_path = Path("TextEditor.ico")
+    if ico_path.exists():
+        cmd.insert(cmd.index("--name"), f"--icon={ico_path}")
    
     print("\n🔨 Запуск PyInstaller...")
     print(f" Команда: {' '.join(cmd[:3])}...")
@@ -100,6 +96,7 @@ def build_executable():
     except Exception as e:
         print(f"❌ Ошибка: {e}")
         return False
+
 def cleanup():
     """Удаление временных файлов сборки"""
     project_dir = Path(__file__).parent / "."
@@ -125,6 +122,7 @@ def cleanup():
         if file_path.exists():
             file_path.unlink()
             print(f" Удален файл: {file_path.name}")
+
 def main():
     print("\n")
    
@@ -153,6 +151,7 @@ def main():
         cleanup()
    
     return success
+
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)

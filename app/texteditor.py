@@ -1,4 +1,4 @@
-# texteditor.py
+# app/texteditor.py
 """
 Основной класс текстового редактора PyQt6
 """
@@ -9,7 +9,7 @@ from pathlib import Path
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QTabWidget, QTextEdit, QLabel, QSplitter,
                              QMessageBox, QFileDialog, QInputDialog)
-from PyQt6.QtCore import Qt, QTimer, QSettings, QSize
+from PyQt6.QtCore import Qt, QTimer, QSettings, QSize, QEvent
 from PyQt6.QtGui import QFont, QIcon, QAction, QKeySequence, QShortcut
 from app.core.file_manager import FileManager
 from app.core.editor_commands import EditorCommands
@@ -21,6 +21,7 @@ from app.ui.menu import MenuManager
 from app.ui.toolbar import ToolbarManager
 from app.ui.statusbar import StatusBarManager
 from app.utils.constants import *
+
 class TextEditorApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -31,6 +32,8 @@ class TextEditorApp(QMainWindow):
         self.auto_save_enabled = False
         self.auto_save_interval = AUTOSAVE_INTERVAL
         self.theme = DEFAULT_THEME
+        self.tab_data = {}
+        self.current_tab_index = 0
        
         # Создание директорий
         self.setup_directories()
@@ -47,8 +50,8 @@ class TextEditorApp(QMainWindow):
        
         # Настройка UI
         self.setup_ui()
-        self.setup_bindings()
         self.setup_autosave_timer()
+        self.setup_bindings()
        
         # Загрузка сессии
         self.session_manager.load_session()
@@ -72,6 +75,7 @@ class TextEditorApp(QMainWindow):
     def setup_ui(self):
         """Настройка пользовательского интерфейса"""
         self.setWindowTitle("Текстовый Редактор 3.4")
+        self.setObjectName("TextEditorApp")  # ✅ ИСПРАВЛЕНО: Установляем objectName для окна
         self.setGeometry(100, 100, 1200, 700)
        
         # Загрузка иконки
@@ -120,6 +124,9 @@ class TextEditorApp(QMainWindow):
         text_edit.setFont(QFont(DEFAULT_FONT[0], DEFAULT_FONT[1]))
         text_edit.textChanged.connect(self.on_text_changed)
         text_edit.cursorPositionChanged.connect(self.update_status)
+        
+        # Разрешаем горячие клавиши в текстовом поле
+        text_edit.installEventFilter(self)
        
         if content:
             text_edit.setPlainText(content)
@@ -131,7 +138,6 @@ class TextEditorApp(QMainWindow):
             tab_name = f"Новый {self.tab_widget.count() + 1}"
        
         # Храним метаданные в словаре
-        self.tab_data = getattr(self, 'tab_data', {})
         tab_index = self.tab_widget.addTab(text_edit, tab_name)
        
         self.tab_data[tab_index] = {
@@ -231,39 +237,119 @@ class TextEditorApp(QMainWindow):
             self.setWindowTitle(f"Текстовый Редактор 3.4 - {name}{modified}")
         else:
             self.setWindowTitle("Текстовый Редактор 3.4")
-           
+       
     def setup_bindings(self):
-        """Привязка горячих клавиш"""
+        """Привязка горячих клавиш - ИСПРАВЛЕНО"""
         # Файловые операции
-        QShortcut(QKeySequence.StandardKey.New, self, self.file_manager.new_file)
-        QShortcut(QKeySequence.StandardKey.Open, self, self.file_manager.open_file)
-        QShortcut(QKeySequence.StandardKey.Save, self, self.file_manager.save_file)
-        QShortcut(QKeySequence.StandardKey.SaveAs, self, self.file_manager.save_as_file)
-        QShortcut(QKeySequence.StandardKey.Print, self, self.file_manager.print_file)
-        QShortcut(QKeySequence.StandardKey.Quit, self, self.close)
+        self.shortcut_new = QShortcut(QKeySequence.StandardKey.New, self)
+        self.shortcut_new.activated.connect(self.file_manager.new_file)
+        
+        self.shortcut_open = QShortcut(QKeySequence.StandardKey.Open, self)
+        self.shortcut_open.activated.connect(self.file_manager.open_file)
+        
+        self.shortcut_save = QShortcut(QKeySequence.StandardKey.Save, self)
+        self.shortcut_save.activated.connect(self.file_manager.save_file)
+        
+        self.shortcut_save_as = QShortcut(QKeySequence.StandardKey.SaveAs, self)
+        self.shortcut_save_as.activated.connect(self.file_manager.save_as_file)
+        
+        self.shortcut_print = QShortcut(QKeySequence.StandardKey.Print, self)
+        self.shortcut_print.activated.connect(self.file_manager.print_file)
+        
+        self.shortcut_quit = QShortcut(QKeySequence.StandardKey.Quit, self)
+        self.shortcut_quit.activated.connect(self.close)
        
         # Редактирование
-        QShortcut(QKeySequence.StandardKey.Undo, self, self.editor_commands.undo)
-        QShortcut(QKeySequence.StandardKey.Redo, self, self.editor_commands.redo)
-        QShortcut(QKeySequence.StandardKey.Cut, self, self.editor_commands.cut)
-        QShortcut(QKeySequence.StandardKey.Copy, self, self.editor_commands.copy)
-        QShortcut(QKeySequence.StandardKey.Paste, self, self.editor_commands.paste)
-        QShortcut(QKeySequence.StandardKey.SelectAll, self, self.editor_commands.select_all)
-        QShortcut(QKeySequence.StandardKey.Find, self, self.show_search)
-        QShortcut(QKeySequence.StandardKey.Replace, self, self.show_replace)
+        self.shortcut_undo = QShortcut(QKeySequence.StandardKey.Undo, self)
+        self.shortcut_undo.activated.connect(self.editor_commands.undo)
+        
+        self.shortcut_redo = QShortcut(QKeySequence.StandardKey.Redo, self)
+        self.shortcut_redo.activated.connect(self.editor_commands.redo)
+        
+        self.shortcut_cut = QShortcut(QKeySequence.StandardKey.Cut, self)
+        self.shortcut_cut.activated.connect(self.editor_commands.cut)
+        
+        self.shortcut_copy = QShortcut(QKeySequence.StandardKey.Copy, self)
+        self.shortcut_copy.activated.connect(self.editor_commands.copy)
+        
+        self.shortcut_paste = QShortcut(QKeySequence.StandardKey.Paste, self)
+        self.shortcut_paste.activated.connect(self.editor_commands.paste)
+        
+        self.shortcut_select_all = QShortcut(QKeySequence.StandardKey.SelectAll, self)
+        self.shortcut_select_all.activated.connect(self.editor_commands.select_all)
+        
+        self.shortcut_find = QShortcut(QKeySequence.StandardKey.Find, self)
+        self.shortcut_find.activated.connect(self.show_search)
+        
+        self.shortcut_replace = QShortcut(QKeySequence.StandardKey.Replace, self)
+        self.shortcut_replace.activated.connect(self.show_replace)
        
         # Вкладки
-        QShortcut(QKeySequence("Ctrl+T"), self, self.new_tab)
-        QShortcut(QKeySequence("Ctrl+W"), self, self.close_current_tab)
+        self.shortcut_new_tab = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.shortcut_new_tab.activated.connect(self.new_tab)
+        
+        self.shortcut_close_tab = QShortcut(QKeySequence("Ctrl+W"), self)
+        self.shortcut_close_tab.activated.connect(self.close_current_tab)
        
         # Масштабирование
-        QShortcut(QKeySequence.StandardKey.ZoomIn, self, self.editor_commands.zoom_in)
-        QShortcut(QKeySequence.StandardKey.ZoomOut, self, self.editor_commands.zoom_out)
-        QShortcut(QKeySequence("Ctrl+0"), self, self.editor_commands.zoom_reset)
+        self.shortcut_zoom_in = QShortcut(QKeySequence.StandardKey.ZoomIn, self)
+        self.shortcut_zoom_in.activated.connect(self.editor_commands.zoom_in)
+        
+        self.shortcut_zoom_out = QShortcut(QKeySequence.StandardKey.ZoomOut, self)
+        self.shortcut_zoom_out.activated.connect(self.editor_commands.zoom_out)
+        
+        self.shortcut_zoom_reset = QShortcut(QKeySequence("Ctrl+0"), self)
+        self.shortcut_zoom_reset.activated.connect(self.editor_commands.zoom_reset)
        
         # Другое
-        QShortcut(QKeySequence("F5"), self, self.editor_commands.insert_datetime)
-        QShortcut(QKeySequence("F1"), self, self.menu_manager.show_help)
+        self.shortcut_datetime = QShortcut(QKeySequence("F5"), self)
+        self.shortcut_datetime.activated.connect(self.editor_commands.insert_datetime)
+        
+        self.shortcut_help = QShortcut(QKeySequence("F1"), self)
+        self.shortcut_help.activated.connect(self.menu_manager.show_help)
+    
+    def eventFilter(self, obj, event):
+        """Перехват событий для горячих клавиш в текстовом поле"""
+        if event.type() == QEvent.Type.KeyPress:
+            key = event.key()
+            modifiers = event.modifiers()
+            
+            # Проверяем если это текстовый редактор
+            if isinstance(obj, QTextEdit):
+                # Ctrl+Z - отмена (стандартная)
+                if key == Qt.Key.Key_Z and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.editor_commands.undo()
+                    return True
+                # Ctrl+Y - повтор (стандартная)
+                elif key == Qt.Key.Key_Y and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.editor_commands.redo()
+                    return True
+                # Ctrl+F - поиск
+                elif key == Qt.Key.Key_F and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.show_search()
+                    return True
+                # Ctrl+H - замена
+                elif key == Qt.Key.Key_H and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.show_replace()
+                    return True
+                # Ctrl++ - увеличить
+                elif key == Qt.Key.Key_Plus and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.editor_commands.zoom_in()
+                    return True
+                # Ctrl+- - уменьшить
+                elif key == Qt.Key.Key_Minus and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.editor_commands.zoom_out()
+                    return True
+                # Ctrl+0 - сброс масштаба
+                elif key == Qt.Key.Key_0 and modifiers == Qt.KeyboardModifier.ControlModifier:
+                    self.editor_commands.zoom_reset()
+                    return True
+                # F5 - дата/время
+                elif key == Qt.Key.Key_F5:
+                    self.editor_commands.insert_datetime()
+                    return True
+        
+        return super().eventFilter(obj, event)
        
     def show_search(self):
         """Показать панель поиска"""
