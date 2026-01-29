@@ -1,0 +1,57 @@
+# Временные файлы редакторов и ОС
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+app/__pycache__/
+app/migrations/__pycache__/
+app/core/__pycache__/
+app/features/__pycache__/
+app/ui/__pycache__/
+app/utils/__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+wheels/
+pip-wheel-metadata/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Логи и БД
+*.log
+*.sql
+*.sqlite
+
+# Окружение
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Кэш и тесты
+.coverage
+htmlcov/
+.pytest_cache/
+.ipynb_checkpoints
+
+# Qt/PyQt
+*.pyc
+*.pyo
+
+# Проект
+.texteditor/
