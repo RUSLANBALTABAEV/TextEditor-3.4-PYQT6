@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QTabWidget, QTextEdit, QLabel, QSplitter,
                              QMessageBox, QFileDialog, QInputDialog)
 from PyQt6.QtCore import Qt, QTimer, QSettings, QSize
-from PyQt6.QtGui import QFont, QIcon, QAction, QKeySequence
+from PyQt6.QtGui import QFont, QIcon, QAction, QKeySequence, QShortcut
 
 from app.core.file_manager import FileManager
 from app.core.editor_commands import EditorCommands
@@ -237,8 +237,6 @@ class TextEditorApp(QMainWindow):
     def setup_bindings(self):
         """Привязка горячих клавиш"""
         # Файловые операции
-        QShortcut = __import__('PyQt6.QtGui', fromlist=['QShortcut']).QShortcut
-        
         QShortcut(QKeySequence.StandardKey.New, self, self.file_manager.new_file)
         QShortcut(QKeySequence.StandardKey.Open, self, self.file_manager.open_file)
         QShortcut(QKeySequence.StandardKey.Save, self, self.file_manager.save_file)
@@ -257,12 +255,17 @@ class TextEditorApp(QMainWindow):
         QShortcut(QKeySequence.StandardKey.Replace, self, self.show_replace)
         
         # Вкладки
-        QShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_T), self, self.new_tab)
-        QShortcut(QKeySequence(Qt.Modifier.CTRL | Qt.Key.Key_W), self, self.close_current_tab)
+        QShortcut(QKeySequence("Ctrl+T"), self, self.new_tab)
+        QShortcut(QKeySequence("Ctrl+W"), self, self.close_current_tab)
         
         # Масштабирование
         QShortcut(QKeySequence.StandardKey.ZoomIn, self, self.editor_commands.zoom_in)
         QShortcut(QKeySequence.StandardKey.ZoomOut, self, self.editor_commands.zoom_out)
+        QShortcut(QKeySequence("Ctrl+0"), self, self.editor_commands.zoom_reset)
+        
+        # Другое
+        QShortcut(QKeySequence("F5"), self, self.editor_commands.insert_datetime)
+        QShortcut(QKeySequence("F1"), self, self.menu_manager.show_help)
         
     def show_search(self):
         """Показать панель поиска"""

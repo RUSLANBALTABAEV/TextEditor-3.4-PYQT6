@@ -18,14 +18,14 @@ class MenuManager:
         # Меню Файл
         file_menu = menubar.addMenu("Файл")
         
-        file_menu.addAction("Новый", self.editor.file_manager.new_file, QKeySequence.StandardKey.New)
-        file_menu.addAction("Открыть", self.editor.file_manager.open_file, QKeySequence.StandardKey.Open)
-        file_menu.addAction("Сохранить", self.editor.file_manager.save_file, QKeySequence.StandardKey.Save)
-        file_menu.addAction("Сохранить как", self.editor.file_manager.save_as_file, QKeySequence.StandardKey.SaveAs)
+        file_menu.addAction("Новый", self.editor.file_manager.new_file).setShortcut(QKeySequence.StandardKey.New)
+        file_menu.addAction("Открыть", self.editor.file_manager.open_file).setShortcut(QKeySequence.StandardKey.Open)
+        file_menu.addAction("Сохранить", self.editor.file_manager.save_file).setShortcut(QKeySequence.StandardKey.Save)
+        file_menu.addAction("Сохранить как", self.editor.file_manager.save_as_file).setShortcut(QKeySequence.StandardKey.SaveAs)
         
         file_menu.addSeparator()
-        file_menu.addAction("Новая вкладка", self.editor.new_tab, "Ctrl+T")
-        file_menu.addAction("Закрыть вкладку", self.editor.close_current_tab, "Ctrl+W")
+        file_menu.addAction("Новая вкладка", self.editor.new_tab).setShortcut("Ctrl+T")
+        file_menu.addAction("Закрыть вкладку", self.editor.close_current_tab).setShortcut("Ctrl+W")
         
         file_menu.addSeparator()
         autosave_action = file_menu.addAction("Автосохранение")
@@ -33,23 +33,23 @@ class MenuManager:
         autosave_action.triggered.connect(self.editor.autosave_manager.toggle_autosave)
         
         file_menu.addSeparator()
-        file_menu.addAction("Печать", self.editor.file_manager.print_file, QKeySequence.StandardKey.Print)
+        file_menu.addAction("Печать", self.editor.file_manager.print_file).setShortcut(QKeySequence.StandardKey.Print)
         file_menu.addSeparator()
-        file_menu.addAction("Выход", self.editor.close, QKeySequence.StandardKey.Quit)
+        file_menu.addAction("Выход", self.editor.close).setShortcut(QKeySequence.StandardKey.Quit)
         
         # Меню Правка
         edit_menu = menubar.addMenu("Правка")
         
-        edit_menu.addAction("Отменить", self.editor.editor_commands.undo, QKeySequence.StandardKey.Undo)
-        edit_menu.addAction("Повторить", self.editor.editor_commands.redo, QKeySequence.StandardKey.Redo)
+        edit_menu.addAction("Отменить", self.editor.editor_commands.undo).setShortcut(QKeySequence.StandardKey.Undo)
+        edit_menu.addAction("Повторить", self.editor.editor_commands.redo).setShortcut(QKeySequence.StandardKey.Redo)
         edit_menu.addSeparator()
-        edit_menu.addAction("Вырезать", self.editor.editor_commands.cut, QKeySequence.StandardKey.Cut)
-        edit_menu.addAction("Копировать", self.editor.editor_commands.copy, QKeySequence.StandardKey.Copy)
-        edit_menu.addAction("Вставить", self.editor.editor_commands.paste, QKeySequence.StandardKey.Paste)
+        edit_menu.addAction("Вырезать", self.editor.editor_commands.cut).setShortcut(QKeySequence.StandardKey.Cut)
+        edit_menu.addAction("Копировать", self.editor.editor_commands.copy).setShortcut(QKeySequence.StandardKey.Copy)
+        edit_menu.addAction("Вставить", self.editor.editor_commands.paste).setShortcut(QKeySequence.StandardKey.Paste)
         edit_menu.addSeparator()
-        edit_menu.addAction("Найти", self.editor.show_search, QKeySequence.StandardKey.Find)
-        edit_menu.addAction("Заменить", self.editor.show_replace, QKeySequence.StandardKey.Replace)
-        edit_menu.addAction("Выделить все", self.editor.editor_commands.select_all, QKeySequence.StandardKey.SelectAll)
+        edit_menu.addAction("Найти", self.editor.show_search).setShortcut(QKeySequence.StandardKey.Find)
+        edit_menu.addAction("Заменить", self.editor.show_replace).setShortcut(QKeySequence.StandardKey.Replace)
+        edit_menu.addAction("Выделить все", self.editor.editor_commands.select_all).setShortcut(QKeySequence.StandardKey.SelectAll)
         
         # Меню Формат
         format_menu = menubar.addMenu("Формат")
@@ -71,20 +71,20 @@ class MenuManager:
         # Меню Вид
         view_menu = menubar.addMenu("Вид")
         
-        view_menu.addAction("Увеличить", self.editor.editor_commands.zoom_in, "Ctrl++")
-        view_menu.addAction("Уменьшить", self.editor.editor_commands.zoom_out, "Ctrl+-")
-        view_menu.addAction("Сбросить масштаб", self.editor.editor_commands.zoom_reset, "Ctrl+0")
+        view_menu.addAction("Увеличить", self.editor.editor_commands.zoom_in).setShortcut("Ctrl++")
+        view_menu.addAction("Уменьшить", self.editor.editor_commands.zoom_out).setShortcut("Ctrl+-")
+        view_menu.addAction("Сбросить масштаб", self.editor.editor_commands.zoom_reset).setShortcut("Ctrl+0")
         
         # Меню Инструменты
         tools_menu = menubar.addMenu("Инструменты")
         
         tools_menu.addAction("Статистика", self.editor.editor_commands.show_statistics)
-        tools_menu.addAction("Вставить дату/время", self.editor.editor_commands.insert_datetime, "F5")
+        tools_menu.addAction("Вставить дату/время", self.editor.editor_commands.insert_datetime).setShortcut("F5")
         
         # Меню Справка
         help_menu = menubar.addMenu("Справка")
         
-        help_menu.addAction("Справка", self.show_help, "F1")
+        help_menu.addAction("Справка", self.show_help).setShortcut("F1")
         help_menu.addAction("О программе", self.show_about)
         help_menu.addAction("Лицензия", self.show_license)
         
