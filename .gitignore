@@ -25,6 +25,12 @@ var/
 wheels/
 pip-wheel-metadata/
 
+# Pyinstaller
+*.spec
+TextEditor.spec
+dist/*
+dist/
+
 # IDE
 .vscode/
 .idea/
